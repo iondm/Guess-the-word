@@ -31,16 +31,23 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
   cached_network_image: ^3.1.0
-  rainbow_color: ^2.0.1
   flutter_archive: ^4.0.1
-  permission_handler: ^8.2.5
+  # permission_handler: ^8.2.5
   sqflite: ^2.0.0+4
   animated_size_and_fade: ^3.0.0
   shared_preferences: ^2.0.8
+  
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_launcher_icons: ^0.9.2
+
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/logo.jpeg"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -54,13 +61,176 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/images/loading-opaque.gif
+    # - assets/logo.png
+    - assets/logo-white.png
+    - assets/logo-black.png
+    - assets/logo-transparent.png
+    
     - assets/images/correct-symbol.png
-    - assets/images/next.png
-    - assets/images/back.png
     - assets/images/coins.png
-    - assets/images/hint.png
+    - assets/images/start.png
+    - assets/images/up-arrow.png
+    - assets/images/turtle.png
+    - assets/images/sports.png
+    - assets/images/unknown.png
+    - assets/images/monument.png
+    - assets/images/medal.png
+    - assets/images/play-button.png
+    - assets/images/vehicle.png
 
+    # Start Level
+    - assets/levels/bn:00013077n/img_bridge1.jpg
+    - assets/levels/bn:00013077n/img_bridge2.jpg
+    - assets/levels/bn:00013077n/img_bridge3.jpg
+    - assets/levels/bn:00013077n/img_bridge4.jpg
+
+    - assets/levels/bn:00015267n/img_dog1.jpg
+    - assets/levels/bn:00015267n/img_dog2.jpg
+    - assets/levels/bn:00015267n/img_dog3.jpg
+    - assets/levels/bn:00015267n/img_dog4.jpg
+
+    - assets/levels/bn:00019887n/img_clock1.jpg
+    - assets/levels/bn:00019887n/img_clock2.jpg
+    - assets/levels/bn:00019887n/img_clock3.jpg
+    - assets/levels/bn:00019887n/img_clock4.jpg
+
+    - assets/levels/bn:00029980n/img_eiffel_tower1.jpg
+    - assets/levels/bn:00029980n/img_eiffel_tower2.jpg
+    - assets/levels/bn:00029980n/img_eiffel_tower3.jpg
+    - assets/levels/bn:00029980n/img_eiffel_tower4.jpg
+
+    - assets/levels/bn:00042379n/img_water1.jpg
+    - assets/levels/bn:00042379n/img_water2.jpg
+    - assets/levels/bn:00042379n/img_water3.jpg
+    - assets/levels/bn:00042379n/img_water4.jpg
+
+    # Sport Level
+    - assets/levels/bn:00023796n/img_Cricket1.jpg
+    - assets/levels/bn:00023796n/img_Cricket2.jpg
+    - assets/levels/bn:00023796n/img_Cricket3.jpg
+    - assets/levels/bn:00023796n/img_Cricket4.jpg
+
+    - assets/levels/bn:00023320n/img_Tennis1.jpg
+    - assets/levels/bn:00023320n/img_Tennis2.jpg
+    - assets/levels/bn:00023320n/img_Tennis3.jpg
+    - assets/levels/bn:00023320n/img_Tennis4.jpg
+
+    - assets/levels/bn:00080220n/img_Volleyball1.jpg
+    - assets/levels/bn:00080220n/img_Volleyball2.jpg
+    - assets/levels/bn:00080220n/img_Volleyball3.jpg
+    - assets/levels/bn:00080220n/img_Volleyball4.jpg
+
+    - assets/levels/bn:00068511n/img_Rugby1.jpg
+    - assets/levels/bn:00068511n/img_Rugby2.jpg
+    - assets/levels/bn:00068511n/img_Rugby3.jpg
+    - assets/levels/bn:00068511n/img_Rugby4.jpg
+
+    - assets/levels/bn:00041010n/img_Golf1.jpg
+    - assets/levels/bn:00041010n/img_Golf2.jpg
+    - assets/levels/bn:00041010n/img_Golf3.jpg
+    - assets/levels/bn:00041010n/img_Golf4.jpg
+
+    - assets/levels/bn:00044331n/img_Ice_hockey1.jpg
+    - assets/levels/bn:00044331n/img_Ice_hockey2.jpg
+    - assets/levels/bn:00044331n/img_Ice_hockey3.jpg
+    - assets/levels/bn:00044331n/img_Ice_hockey4.jpg
+
+    - assets/levels/bn:00049631n/img_Lacrosse1.jpg
+    - assets/levels/bn:00049631n/img_Lacrosse2.jpg
+    - assets/levels/bn:00049631n/img_Lacrosse3.jpg
+    - assets/levels/bn:00049631n/img_Lacrosse4.jpg
+
+    # Monuments level
+    - assets/levels/bn:00018485n/img_Great_Wall1.jpg
+    - assets/levels/bn:00018485n/img_Great_Wall2.jpg
+    - assets/levels/bn:00018485n/img_Great_Wall3.jpg
+    - assets/levels/bn:00018485n/img_Great_Wall4.jpg
+
+    - assets/levels/bn:00049459n/img_Kremlin1.jpg
+    - assets/levels/bn:00049459n/img_Kremlin2.jpg
+    - assets/levels/bn:00049459n/img_Kremlin3.jpg
+    - assets/levels/bn:00049459n/img_Kremlin4.jpg
+
+    - assets/levels/bn:00041586n/img_Pyramid1.jpg
+    - assets/levels/bn:00041586n/img_Pyramid2.jpg
+    - assets/levels/bn:00041586n/img_Pyramid3.jpg
+    - assets/levels/bn:00041586n/img_Pyramid4.jpg
+
+    - assets/levels/bn:00050429n/img_Leaning_Tower1.jpg
+    - assets/levels/bn:00050429n/img_Leaning_Tower2.jpg
+    - assets/levels/bn:00050429n/img_Leaning_Tower3.jpg
+    - assets/levels/bn:00050429n/img_Leaning_Tower4.jpg
+
+    - assets/levels/bn:00074065n/img_Statue_of_Liberty1.jpg
+    - assets/levels/bn:00074065n/img_Statue_of_Liberty2.jpg
+    - assets/levels/bn:00074065n/img_Statue_of_Liberty3.jpg
+    - assets/levels/bn:00074065n/img_Statue_of_Liberty4.jpg
+
+    - assets/levels/bn:00052578n/img_Machu_Picchu1.jpg
+    - assets/levels/bn:00052578n/img_Machu_Picchu2.jpg
+    - assets/levels/bn:00052578n/img_Machu_Picchu3.jpg
+    - assets/levels/bn:00052578n/img_Machu_Picchu4.jpg
+
+
+    # Animal Level
+    - assets/levels/bn:00036129n/img_fox1.jpg
+    - assets/levels/bn:00036129n/img_fox2.jpg
+    - assets/levels/bn:00036129n/img_fox3.jpg
+    - assets/levels/bn:00036129n/img_fox4.jpg
+ 
+    - assets/levels/bn:00059723n/img_otter1.jpg
+    - assets/levels/bn:00059723n/img_otter2.jpg
+    - assets/levels/bn:00059723n/img_otter3.jpg
+    - assets/levels/bn:00059723n/img_otter4.jpg
+ 
+    - assets/levels/bn:00021704n/img_rabbit1.jpg
+    - assets/levels/bn:00021704n/img_rabbit2.jpg
+    - assets/levels/bn:00021704n/img_rabbit3.jpg
+    - assets/levels/bn:00021704n/img_rabbit4.jpg
+ 
+    - assets/levels/bn:00033329n/img_Parrot1.jpg
+    - assets/levels/bn:00033329n/img_Parrot2.jpg
+    - assets/levels/bn:00033329n/img_Parrot3.jpg
+    - assets/levels/bn:00033329n/img_Parrot4.jpg
+ 
+    - assets/levels/bn:00049156n/img_lion1.jpg
+    - assets/levels/bn:00049156n/img_lion2.jpg
+    - assets/levels/bn:00049156n/img_lion3.jpg
+    - assets/levels/bn:00049156n/img_lion4.jpg
+ 
+    - assets/levels/bn:00031345n/img_horse1.jpg
+    - assets/levels/bn:00031345n/img_horse2.jpg
+    - assets/levels/bn:00031345n/img_horse3.jpg
+    - assets/levels/bn:00031345n/img_horse4.jpg
+
+
+    - assets/levels/bn:00007309n/img_car1.jpg
+    - assets/levels/bn:00007309n/img_car2.jpg
+    - assets/levels/bn:00007309n/img_car3.jpg
+    - assets/levels/bn:00007309n/img_car4.jpg
+
+    - assets/levels/bn:00077857n/img_tractor1.jpg
+    - assets/levels/bn:00077857n/img_tractor2.jpg
+    - assets/levels/bn:00077857n/img_tractor3.jpg
+    - assets/levels/bn:00077857n/img_tractor4.jpg
+
+    - assets/levels/bn:00002275n/img_aircraft1.jpg
+    - assets/levels/bn:00002275n/img_aircraft2.jpg
+    - assets/levels/bn:00002275n/img_aircraft3.jpg
+    - assets/levels/bn:00002275n/img_aircraft4.jpg
+
+    - assets/levels/bn:00007329n/img_bus1.jpg
+    - assets/levels/bn:00007329n/img_bus2.jpg
+    - assets/levels/bn:00007329n/img_bus3.jpg
+    - assets/levels/bn:00007329n/img_bus4.jpg
+
+    - assets/levels/bn:00066028n/img_train1.jpg
+    - assets/levels/bn:00066028n/img_train2.jpg
+    - assets/levels/bn:00066028n/img_train3.jpg
+    - assets/levels/bn:00066028n/img_train4.jpg
+
+
+    
     # - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

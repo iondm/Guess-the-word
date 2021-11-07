@@ -11,7 +11,10 @@ class LevelDB {
     await db.execute('''
               CREATE TABLE IF NOT EXISTS levels (
                 id TEXT PRIMARY KEY,
-                name TEXT NOT NULL
+                name TEXT NOT NULL,
+                completed TEXT,
+                type TEXT,
+                imagePath TEXT
               )
               ''');
   }
@@ -20,6 +23,13 @@ class LevelDB {
     Database? db = await DatabaseHelper.instance.database;
     int id = await db!.insert("levels", level.toMap(),
         conflictAlgorithm: ConflictAlgorithm.ignore);
+    return id;
+  }
+
+  static Future<int> setCompleted(Level level, String completed) async {
+    Database? db = await DatabaseHelper.instance.database;
+    int id = await db!.update("levels", {"completed": completed},
+        where: "id = ?", whereArgs: [level.id]);
     return id;
   }
 
@@ -39,24 +49,28 @@ class LevelDB {
     Database? db = await DatabaseHelper.instance.database;
     List<Map> levels = await db!.query(
       "levels",
-      columns: ["id", "name"],
+      columns: ["id", "name", "completed", "type", "imagePath"],
     );
     return List.of(levels.map((e) => Level.fromMap(e)));
   }
 
+  static Future<void> drop() async {
+    Database? db = await DatabaseHelper.instance.database;
+    await db!.execute("drop table if exists levels");
+  }
+
   static Future<List<Level>?> getServerLevels() async {
     var url = "http://35.180.201.46:8080/levels/getAllLevels";
-    try {
-      final response =
-          await http.get(Uri.parse(url)).timeout(Duration(seconds: 5));
-      if (response.statusCode == 200) {
-        return (jsonDecode(response.body).map<Level>((e) {
-          return Level.fromMap(e);
-        }).toList());
-      }
-    } catch (e) {
-      return null;
+
+    final response =
+        await http.get(Uri.parse(url)).timeout(Duration(seconds: 5));
+    if (response.statusCode == 200) {
+      return (jsonDecode(response.body).map<Level>((e) {
+        return Level.fromMap(e);
+      }).toList());
     }
+
+    return null;
   }
 
   static Future<List<Level>?> aCaso() async {

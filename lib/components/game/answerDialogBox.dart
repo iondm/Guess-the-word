@@ -4,11 +4,18 @@ import 'package:flutter/material.dart';
 import 'package:sofia/components/game/constants.dart';
 
 class CustomDialogBox extends StatefulWidget {
-  final String title, descriptions, text;
-  final Function nextWord;
+  final String title, descriptions, text, iconAsset;
+  final Function function;
+  final bool curstomReturn;
 
   const CustomDialogBox(
-      this.title, this.descriptions, this.text, this.nextWord);
+    this.title,
+    this.descriptions,
+    this.text,
+    this.function,
+    this.curstomReturn,
+    this.iconAsset,
+  );
 
   @override
   _CustomDialogBoxState createState() => _CustomDialogBoxState();
@@ -67,8 +74,8 @@ class _CustomDialogBoxState extends State<CustomDialogBox> {
                 alignment: Alignment.bottomRight,
                 child: TextButton(
                     onPressed: () {
-                      widget.nextWord();
-                      Navigator.of(context).pop();
+                      widget.function();
+                      if (widget.curstomReturn) Navigator.of(context).pop();
                     },
                     child: Text(
                       widget.text,
@@ -87,7 +94,7 @@ class _CustomDialogBoxState extends State<CustomDialogBox> {
             child: ClipRRect(
                 borderRadius:
                     BorderRadius.all(Radius.circular(Constants.avatarRadius)),
-                child: Image.asset("assets/images/correct-symbol.png")),
+                child: Image.asset(widget.iconAsset)),
           ),
         ),
       ],

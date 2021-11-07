@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:path/path.dart';
+import 'package:sofia/components/level/constants.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
 import '../models/level.dart';
@@ -41,8 +42,37 @@ class DatabaseHelper {
   }
 
   Future onCreate() async {
+    // LevelDB.drop();
+    // WordDB.drop();
+
     LevelDB.createTable();
     // await WordDB.drop();
     WordDB.createTable();
+
+    initDbData();
+  }
+
+  void initDbData() async {
+    final levelsDB = await LevelDB.getAllLevels();
+
+    if (levelsDB.length == 0) {
+      print("Init DB");
+
+      final levels = Constants.levels;
+      for (final level in levels) {
+        level.save();
+        print("SAVE level ${level.id}");
+
+        final words = await WordDB.getWords(level.id, null);
+
+        if (words.length == 0) {
+          Constants.getLevelWords(level.id).forEach((word) {
+            print(
+                "Saving in level ${word.levelId} lemma ${word.lemma} id ${word.synsetId}");
+            word.save();
+          });
+        }
+      }
+    }
   }
 }

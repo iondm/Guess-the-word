@@ -7,10 +7,15 @@ class Word {
   late String synsetId;
   late String levelId;
   late String lemma;
-  late int completed;
-  late int imageNumbers;
+  late int completed = 0;
+  late int imageNumbers = 4;
 
   Word();
+  Word.data({
+    this.synsetId: "synsetId",
+    this.levelId: "levelId",
+    this.lemma: "lemma",
+  });
 
   Word.fromMap(Map<dynamic, dynamic> map) {
     synsetId = map["synset_id"];

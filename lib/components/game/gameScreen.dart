@@ -21,9 +21,10 @@ class GameScreen extends StatefulWidget {
   int imageIndex;
   final int imagesLength;
   String imagePath;
+  final String mode;
 
   GameScreen(this.level, this.words, this.wordIndex, this.imageIndex,
-      this.imagesLength, this.imagePath);
+      this.imagesLength, this.imagePath, this.mode);
 
   @override
   _GameScreenState createState() => _GameScreenState();
@@ -43,6 +44,13 @@ class _GameScreenState extends State<GameScreen> {
   late final prefs;
 
   void initState() {
+    String wd = "";
+    for (var word in widget.words) {
+      wd +=
+          "new Word.data( synsetId: '${word.synsetId}', levelId: '${word.levelId}', lemma: '${word.lemma}',),";
+    }
+    print(wd);
+
     super.initState();
     this.wordIndex = widget.wordIndex;
     this.imagePath = widget.imagePath;
@@ -51,15 +59,17 @@ class _GameScreenState extends State<GameScreen> {
     checkArrows();
 
     image = Container(
-      child: Image.file(
-        File(this.imagePath),
-      ),
+      child: widget.mode == "offline"
+          ? Image.asset(this.imagePath)
+          : Image.file(
+              File(this.imagePath),
+            ),
     );
   }
 
   void asyncInit() async {
     prefs = await SharedPreferences.getInstance();
-    prefs.setInt('points', 20);
+    // prefs.setInt('points', 20);
 
     print("DATA Points = ${prefs.getInt('points')} ");
   }
@@ -76,7 +86,7 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   void _secretTap() {
-    if (secretTaps == 5) {
+    if (secretTaps == 99) {
       // print(secretTaps.toString());
       setState(() {
         responseVisibility = true; // second function
@@ -100,26 +110,67 @@ class _GameScreenState extends State<GameScreen> {
     this.wordIndex += 1;
     this.imageIndex = 1;
 
-    String wordPath = await widget.words[this.wordIndex].getWordPath();
-    print(wordPath);
-    Directory wordDir = Directory(wordPath);
-    List<FileSystemEntity> images = wordDir.listSync();
-    print(images);
-    this.imagePath = images[0].path.toString();
+    if (wordIndex == widget.words.length) {
+      print("Setting true nextLevel");
+      // MODIFY LOCAL DB
+      print("setting ${widget.level.id} to complete");
+      await LevelDB.setCompleted(widget.level, "true");
+      await prefs.setBool('nextLevel', true);
+
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return CustomDialogBox(
+              "Congratulations!",
+              "You have completed this level!",
+              "Next level",
+              () {
+                Navigator.pop(context, true);
+              },
+              false,
+              "assets/images/medal.png",
+            );
+          }).then((value) => Navigator.pop(context, true));
+
+      return;
+    }
+    // String wordPath = await widget.words[this.wordIndex].getWordPath();
+    // print(wordPath);
+    // Directory wordDir = Directory(wordPath);
+    // List<FileSystemEntity> images = wordDir.listSync();
+    // print(images);
+    // this.imagePath = images[0].path.toString();
+    prefs.setInt(
+        '${widget.words[this.wordIndex].levelId}-last-word', this.wordIndex);
+
+    prefs.setInt(
+        '${widget.words[this.wordIndex].levelId}-${widget.words[this.wordIndex].synsetId}-last-image',
+        this.imageIndex);
+
+    this.imagePath = this
+        .imagePath
+        .replaceFirst(widget.words[this.wordIndex - 1].synsetId,
+            widget.words[this.wordIndex].synsetId)
+        .replaceFirst(widget.words[this.wordIndex - 1].lemma,
+            widget.words[this.wordIndex].lemma);
 
     setState(() {
       print("words =  ${widget.words.length}");
       image = Container(
         key: ValueKey<int>(this.imageIndex),
-        child: Image.file(
-          File(this.imagePath),
-        ),
+        child: widget.mode == "offline"
+            ? Image.asset(this.imagePath)
+            : Image.file(
+                File(this.imagePath),
+              ),
       );
     });
     checkArrows();
   }
 
   void checkArrows() {
+    print("checkArrows");
+    print(widget.imagesLength);
     print(this.imageIndex);
     setState(() {
       if (this.imageIndex == 0 || this.imageIndex == 1) {
@@ -149,16 +200,21 @@ class _GameScreenState extends State<GameScreen> {
     if (this.imageIndex == 0) this.imageIndex += 1;
     this.imageIndex += pos;
     print("${this.imageIndex} + " " + ${widget.imagesLength}");
+    prefs.setInt(
+        '${widget.words[this.wordIndex].levelId}-${widget.words[this.wordIndex].synsetId}-last-image',
+        this.imageIndex);
 
+    this.imagePath = this.imagePath.substring(0, this.imagePath.length - 5) +
+        this.imageIndex.toString() +
+        ".jpg";
     setState(() {
       image = Container(
-        height: 275,
         key: ValueKey<int>(this.imageIndex),
-        child: Image.file(
-          File(this.imagePath.substring(0, this.imagePath.length - 5) +
-              this.imageIndex.toString() +
-              ".jpg"),
-        ),
+        child: widget.mode == "offline"
+            ? Image.asset(this.imagePath)
+            : Image.file(
+                File(this.imagePath),
+              ),
       );
       checkArrows();
 
@@ -238,21 +294,28 @@ class _GameScreenState extends State<GameScreen> {
 
   void testResponse(String response) {
     print("testResponse ${widget.words[this.wordIndex].lemma}");
-    if (equalsIgnoreCase(response, widget.words[this.wordIndex].lemma) ==
+    if (equalsIgnoreCase(response,
+            widget.words[this.wordIndex].lemma.replaceAll("_", " ")) ==
         true) {
       hint = "";
       prefs.setInt('points', prefs.getInt('points') + 10);
       print("DATA Points = ${prefs.getInt('points')} ");
 
-      showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return CustomDialogBox(
+      if ((wordIndex + 1 < widget.words.length))
+        showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return CustomDialogBox(
                 "Correct :)",
                 "Congratulation! \n You have earned 10 coins.",
                 "Next Word",
-                _nextWord);
-          });
+                _nextWord,
+                true,
+                "assets/images/correct-symbol.png",
+              );
+            });
+      else
+        _nextWord();
     } else {
       setState(() {
         hint = "Try again!";
@@ -284,12 +347,17 @@ class _GameScreenState extends State<GameScreen> {
       child: Scaffold(
         body: SingleChildScrollView(
           child: Container(
+            height: MediaQuery.of(context).size.height -
+                MediaQuery.of(context).padding.bottom,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                  colors: [Colors.white.withOpacity(0.9), Colors.white],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomLeft),
-            ),
+                gradient: LinearGradient(
+              begin: Alignment.topRight,
+              end: Alignment.bottomLeft,
+              colors: [
+                Colors.indigo[400]!,
+                Colors.red,
+              ],
+            )),
             child: Padding(
               padding: const EdgeInsets.all(10.0),
               child: Column(
@@ -298,32 +366,36 @@ class _GameScreenState extends State<GameScreen> {
                     height: 275,
                     child: GestureDetector(
                       child: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 2000),
+                        duration: const Duration(seconds: 1),
                         transitionBuilder:
-                            (Widget child, Animation<double> animation) {
-                          return FadeTransition(
-                              child: child, opacity: animation);
-                        },
+                            (Widget child, Animation<double> animation) =>
+                                ScaleTransition(child: child, scale: animation),
                         child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(10),
-                                topRight: Radius.circular(10),
-                                bottomLeft: Radius.circular(10),
-                                bottomRight: Radius.circular(10)),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.5),
-                                spreadRadius: 5,
-                                blurRadius: 7,
-                                offset:
-                                    Offset(0, 3), // changes position of shadow
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topRight,
+                                end: Alignment.bottomLeft,
+                                colors: [
+                                  Colors.indigo[400]!,
+                                  Colors.red,
+                                ],
                               ),
-                            ],
-                          ),
-                          child: image,
-                        ),
+                              borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(10),
+                                  topRight: Radius.circular(10),
+                                  bottomLeft: Radius.circular(10),
+                                  bottomRight: Radius.circular(10)),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.5),
+                                  spreadRadius: 5,
+                                  blurRadius: 7,
+                                  offset: Offset(
+                                      0, 3), // changes position of shadow
+                                ),
+                              ],
+                            ),
+                            child: image),
                       ),
                       onTap: _secretTap,
                     ),
@@ -353,11 +425,13 @@ class _GameScreenState extends State<GameScreen> {
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              SizedBox(width: 28),
+                              SizedBox(width: 40),
                               Text(
                                 "Skip word 10",
                                 style: TextStyle(
-                                    color: Colors.orange, fontSize: 16),
+                                    color: Colors.orange,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16),
                               ),
                               SizedBox(width: 8),
                               Image.asset("assets/images/coins.png", height: 20)

@@ -22,7 +22,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
   int imageIndex = 0;
   int imagesLength = 0;
   String imagePath = "";
-  int maxImgDownload = 11;
+  int maxImgDownload = 1;
   int indexImgDownload = 0;
 
   initState() {
@@ -41,17 +41,17 @@ class _LoadingScreenState extends State<LoadingScreen> {
       _downloadLevelDataAndStartGame(context);
     } else {
       print("Word presents in local db");
-      await _elaboratePathData();
-      // TODO CHECK IF INTERNET IS AVAIBLE FOR DOWNLOAD
-      if (this.imagePath == "noImages") {
-        await _downloadImages(false);
-        await Future.delayed(Duration(seconds: 10));
-      }
-      await _elaboratePathData();
+      // await _elaboratePathData();
+      // // TODO CHECK IF INTERNET IS AVAIBLE FOR DOWNLOAD
+      // if (this.imagePath == "noImages") {
+      //   await _downloadImages(false);
+      //   await Future.delayed(Duration(seconds: 10));
+      // }
+      // await _elaboratePathData();
 
       print("end _loadAndMoveToWords");
 
-      _moveToGame(context);
+      _moveToGameOffline(context);
     }
   }
 
@@ -109,14 +109,14 @@ class _LoadingScreenState extends State<LoadingScreen> {
             "Saving in level ${word.levelId} lemma ${word.lemma} id ${word.synsetId}");
         word.save();
       });
-      await _elaboratePathData();
+      // await _elaboratePathData();
 
-      if (this.imagePath == "noImages") {
-        await _downloadImages(true);
-      }
+      // if (this.imagePath == "noImages") {
+      //   await _downloadImages(true);
+      // }
       print("Moving to game");
 
-      _moveToGame(context);
+      _moveToGameOffline(context);
     } else {
       print("SERVER ERROR");
       // MAKE SERVER ERROR SOMETHING.
@@ -124,22 +124,19 @@ class _LoadingScreenState extends State<LoadingScreen> {
   }
 
   void selectCategory(BuildContext context) {
-    Navigator.of(context).pushNamed(
+    Navigator.of(context).pushReplacementNamed(
       "/game",
       // arguments: code,
     );
   }
 
-  void _moveToGame(BuildContext context) async {
-    if (widget.level.name == "animals") {
-      this.wordIndex = 1;
-      _elaboratePathData();
-    }
-    Navigator.of(context).push(
+  void _moveToGameOffline(BuildContext context) async {
+    imagePath = "assets/levels/${words[0].synsetId}/img_${words[0].lemma}1.jpg";
+    Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (_) {
-          return GameScreen(widget.level, words, wordIndex, imageIndex,
-              imagesLength, imagePath);
+          return GameScreen(widget.level, words, wordIndex, imageIndex, 4,
+              imagePath, "offline");
         },
       ),
     );
