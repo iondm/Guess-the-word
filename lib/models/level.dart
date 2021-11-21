@@ -5,6 +5,7 @@ class Level {
   late String name;
   late String type;
   late String imagePath;
+  late int? num;
   bool completed = false;
 
   Level();
@@ -20,7 +21,15 @@ class Level {
     name = map["name"];
     completed = map["completed"] == "true" ? true : false;
     type = map["type"] == null ? "" : map["type"];
-    imagePath = map["imagePath"] == null ? "" : map["imagePath"];
+    imagePath = map["icon_path"] == null
+        ? map["imagePath"] == null
+            ? ""
+            : map["imagePath"]
+        : map["icon_path"];
+
+    if (map["num"] != null) {
+      num = int.parse(map["num"]);
+    }
   }
 
   Map<String, dynamic> toMap() {

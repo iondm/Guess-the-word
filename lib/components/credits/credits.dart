@@ -50,9 +50,16 @@ Wikipedia http://www.wikipedia.org
 Logo icon - icon4yu https://thenounproject.com/icon4yu/
 
 Icons from www.flaticon.com:
-Play button, Coins, Start, Arrow, Unknown, Monument, Vechicle, Correct symbol -  Freepik https://www.freepik.com" 
-Sports - Pause08 "https://www.flaticon.com/authors/pause08
+Play button, Coins-Reward, Coming-soon, Coins, Start, Arrow, Unknown, Monument, Vechicle, Correct symbol -  Freepik https://www.freepik.com" 
+Sports - Pause08 https://www.flaticon.com/authors/pause08
 Medal - Vectors Market https://www.flaticon.com/authors/vectors-market
+Game-play button - abdul-allib https://www.flaticon.com/authors/abdul-allib
+Logout - wahyu-adam https://www.flaticon.com/authors/wahyu-adam
+items - pixel-perfect https://www.flaticon.com/authors/pixel-perfect
+End race - eight-black-dots https://www.flaticon.com/authors/eight-black-dots 
+Music Instruments - surang https://www.flaticon.com/authors/surang
+
+Sounds: Zapsplat.com
 
 
 
@@ -66,8 +73,8 @@ Medal - Vectors Market https://www.flaticon.com/authors/vectors-market
                 onPressed: () {
                   showAboutDialog(
                       context: context,
-                      applicationName: "Gues the Word",
-                      applicationVersion: "version 0.1");
+                      applicationName: "Guess the Word",
+                      applicationVersion: "Version 0.1");
                 },
               )
             ],

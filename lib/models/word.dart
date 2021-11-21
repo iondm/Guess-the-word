@@ -9,12 +9,14 @@ class Word {
   late String lemma;
   late int completed = 0;
   late int imageNumbers = 4;
+  late String lemmas = "null";
 
   Word();
   Word.data({
     this.synsetId: "synsetId",
     this.levelId: "levelId",
     this.lemma: "lemma",
+    this.lemmas: "null",
   });
 
   Word.fromMap(Map<dynamic, dynamic> map) {
@@ -23,13 +25,16 @@ class Word {
     lemma = map["lemma"];
     completed = map["completed"];
     imageNumbers = map["image_numbers"];
+    lemmas = map["lemmas"] != null ? map["lemmas"] : "null";
   }
+
   Word.fromServerMap(Map<dynamic, dynamic> map) {
     synsetId = map["synsetId"];
     levelId = map["levelId"];
     lemma = map["lemma"];
     completed = int.parse(map["completed"]);
     imageNumbers = int.parse(map["imageNumbers"]);
+    lemmas = map["lemmas"] != null ? map["lemmas"] : "null";
   }
 
   Map<String, dynamic> toMap() {
@@ -39,6 +44,7 @@ class Word {
       "lemma": lemma,
       "completed": completed,
       "image_numbers": imageNumbers,
+      "lemmas": lemmas,
     };
   }
 

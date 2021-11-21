@@ -1,11 +1,13 @@
 import 'dart:io';
 import 'package:path/path.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sofia/components/level/constants.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
 import '../models/level.dart';
 import 'levelDB.dart';
 import 'wordDB.dart';
+import 'wordDataDB.dart';
 
 // database table and column names
 final String tableWords = 'words';
@@ -41,18 +43,24 @@ class DatabaseHelper {
     _database = await openDatabase(path, version: _databaseVersion);
   }
 
-  Future onCreate() async {
-    // LevelDB.drop();
-    // WordDB.drop();
-
+  Future<void> onCreate() async {
     LevelDB.createTable();
-    // await WordDB.drop();
     WordDB.createTable();
+    WordDataDB.createTable();
 
-    initDbData();
+    await initDbData();
+    var prefs = await SharedPreferences.getInstance();
+    prefs.setBool("isDBCreated", true);
+    print("Set isDBCreated to true");
   }
 
-  void initDbData() async {
+  Future deleteDB() async {
+    await LevelDB.drop();
+    await WordDB.drop();
+    await WordDataDB.drop();
+  }
+
+  Future<void> initDbData() async {
     final levelsDB = await LevelDB.getAllLevels();
 
     if (levelsDB.length == 0) {
@@ -62,13 +70,14 @@ class DatabaseHelper {
       for (final level in levels) {
         level.save();
         print("SAVE level ${level.id}");
+        print("initDbData level ${level.imagePath}");
 
         final words = await WordDB.getWords(level.id, null);
 
         if (words.length == 0) {
           Constants.getLevelWords(level.id).forEach((word) {
-            print(
-                "Saving in level ${word.levelId} lemma ${word.lemma} id ${word.synsetId}");
+            // print(
+            //     "Saving in level ${word.levelId} lemma ${word.lemma} id ${word.synsetId}  lemmas ${word.lemmas}   ");
             word.save();
           });
         }

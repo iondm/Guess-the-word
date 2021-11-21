@@ -13,6 +13,7 @@ class WordDB {
                 synset_id varchar(255) primary key,
                 level_id varchar(255) not null,
                 lemma varchar(255),
+                lemmas varchar(1000),
                 completed integer,
                 image_numbers integer
             );
@@ -21,7 +22,8 @@ class WordDB {
 
   static Future<int> insert(Word word) async {
     Database? db = await DatabaseHelper.instance.database;
-    int id = await db!.insert("words", word.toMap());
+    int id = await db!.insert("words", word.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace);
     return id;
   }
 
@@ -52,7 +54,14 @@ class WordDB {
     Database? db = await DatabaseHelper.instance.database;
     List<Map> words = await db!.query(
       "words",
-      columns: ["synset_id", "level_id", "lemma", "completed", "image_numbers"],
+      columns: [
+        "synset_id",
+        "level_id",
+        "lemma",
+        "completed",
+        "image_numbers",
+        "lemmas"
+      ],
       where: "level_id = ? ${(completed != null) ? " and " + comp : ""}",
       whereArgs: [levelId],
     );
@@ -79,6 +88,24 @@ class WordDB {
       },
     );
     if (response.statusCode == 200) {
+      return (jsonDecode(response.body).map<Word>((e) {
+        return Word.fromServerMap(e);
+      }).toList());
+    } else
+      throw Exception('Something went wrong');
+  }
+
+  static Future<List<Word>> getFutureWordsFromServer(int levelNum) async {
+    print("getFutureWordsFromServer");
+
+    var url =
+        "http://35.180.201.46:8080/nextLevel?levelNum=" + levelNum.toString();
+
+    final response = await http.get(Uri.parse(url));
+    print(jsonDecode(response.body));
+
+    if (response.statusCode == 200) {
+      print(jsonDecode(response.body));
       return (jsonDecode(response.body).map<Word>((e) {
         return Word.fromServerMap(e);
       }).toList());

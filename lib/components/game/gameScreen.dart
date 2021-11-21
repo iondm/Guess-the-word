@@ -1,18 +1,24 @@
+import 'dart:async';
 import 'dart:io';
 
+import 'package:audioplayers/audio_cache.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sofia/components/game/aswerTextInput.dart';
 import 'package:sofia/components/game/dialogBox.dart';
 import 'package:sofia/database/levelDB.dart';
+import 'package:sofia/database/wordDataDB.dart';
+import 'package:sofia/models/wordData.dart';
+import 'package:sofia/services/authService.dart';
 import '../../models/word.dart';
 import '../../models/level.dart';
 import 'dart:math' as math;
-
 import '../../database/wordDB.dart';
 import '../../queries/levelManager.dart';
 import 'answerDialogBox.dart';
+import 'package:path/path.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 class GameScreen extends StatefulWidget {
   final Level level;
@@ -21,67 +27,135 @@ class GameScreen extends StatefulWidget {
   int imageIndex;
   final int imagesLength;
   String imagePath;
-  final String mode;
+  final String baseImagePath;
 
   GameScreen(this.level, this.words, this.wordIndex, this.imageIndex,
-      this.imagesLength, this.imagePath, this.mode);
+      this.imagesLength, this.imagePath, this.baseImagePath);
 
   @override
   _GameScreenState createState() => _GameScreenState();
 }
 
-class _GameScreenState extends State<GameScreen> {
-  int secretTaps = 0, wordIndex = 0, imageIndex = 0;
+class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
+  late final prefs;
+  final _controller = TextEditingController();
+  final FocusNode focusNode = FocusNode();
+  int secretTaps = 0, wordIndex = 0, imageIndex = 0, timePassed = 0;
+  String responseText = "",
+      imagePath = "",
+      hint = "",
+      baseImgPath = "",
+      wordTyped = "",
+      userAnswer = "";
+  late DateTime timeEnteredWord;
+  List<String> wordlemmas = [];
+  Color responseColor = Colors.white;
+  Container? image;
   bool responseVisibility = false,
       answerResult = false,
       leftArrow = false,
-      rightArrow = false;
-  String responseText = "", imagePath = "", hint = "";
-  Color responseColor = Colors.white;
-  Container? image;
-  final _controller = TextEditingController();
-  final FocusNode focusNode = FocusNode();
-  late final prefs;
+      rightArrow = false,
+      isWordSkipped = false;
+  AppLifecycleState? _state;
+  final player = AudioCache();
+  late bool isMusicOn = true;
+
+  AppLifecycleState get state => _state!;
 
   void initState() {
-    String wd = "";
-    for (var word in widget.words) {
-      wd +=
-          "new Word.data( synsetId: '${word.synsetId}', levelId: '${word.levelId}', lemma: '${word.lemma}',),";
-    }
-    print(wd);
+    WidgetsBinding.instance!.addObserver(this);
 
-    super.initState();
+    this.baseImgPath = widget.baseImagePath;
+    // String wd = "";
+    // for (var word in widget.words) {
+    //   print(word.lemma);
+    //   print(word.lemmas);
+    //   wd +=
+    //       "new Word.data( synsetId: '${word.synsetId}', levelId: '${word.levelId}', lemma: '${word.lemma}',),";
+    // }
+    // print(wd);
     this.wordIndex = widget.wordIndex;
     this.imagePath = widget.imagePath;
     this.imageIndex = widget.imageIndex;
+    this.wordlemmas = widget.words[this.wordIndex].lemmas.split(";");
+
     asyncInit();
     checkArrows();
 
     image = Container(
-      child: widget.mode == "offline"
+      child: widget.level.type == "offline"
           ? Image.asset(this.imagePath)
           : Image.file(
-              File(this.imagePath),
+              File(join(baseImgPath, this.imagePath)),
             ),
     );
+    super.initState();
   }
 
   void asyncInit() async {
     prefs = await SharedPreferences.getInstance();
-    // prefs.setInt('points', 20);
-
+    this.isMusicOn = prefs.getBool("isMusicOn");
+    initWordData();
+    print("timePassed = $timePassed");
     print("DATA Points = ${prefs.getInt('points')} ");
   }
 
-  void manageErrorImage() async {
-    if (await LevelManager.checkFile(this.imagePath))
-      print("trovato");
-    else
-      _nextWord();
+  @override
+  void dispose() {
+    pauseWordData();
+    WidgetsBinding.instance!.removeObserver(this);
+    super.dispose();
+  }
+
+  void _updateTimer() {
+    print("timePassed = $timePassed");
+    final duration = DateTime.now().difference(timeEnteredWord);
+    timeEnteredWord = DateTime.now();
+    this.timePassed += duration.inSeconds;
+    prefs.setInt("wordTimer", timePassed);
+  }
+
+  void initWordData() {
+    isWordSkipped = false;
+    timeEnteredWord = DateTime.now();
+    int? timePassed = prefs.getInt("wordTimer");
+    if (timePassed != null) this.timePassed = timePassed;
+    String? wordTyped = prefs.getString("wordTyped");
+    if (wordTyped != null) this.wordTyped = wordTyped;
+  }
+
+  void pauseWordData() {
+    _updateTimer();
+    prefs.setString("wordTyped", wordTyped);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.resumed:
+        initWordData();
+        print('Resumed');
+        break;
+      case AppLifecycleState.inactive:
+        pauseWordData();
+        print('Inactive');
+        break;
+      case AppLifecycleState.paused:
+        _updateTimer();
+        pauseWordData();
+        print('Paused');
+        break;
+      case AppLifecycleState.detached:
+        pauseWordData();
+        _updateTimer();
+        print('Detached');
+        break;
+    }
   }
 
   bool equalsIgnoreCase(String string1, String string2) {
+    string1 = string1.replaceAll(" ", "");
+    string2 = string2.replaceAll(" ", "");
     return string1.toLowerCase() == string2.toLowerCase();
   }
 
@@ -104,11 +178,37 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   void _nextWord() async {
+    _updateTimer();
+    prefs.setInt("wordTimer", 0);
+    prefs.setString("wordTyped", "");
+    String userId = (prefs.getString("token") != null)
+        ? prefs.getString("userId")
+        : prefs.getString("tempUserId");
+    Word currentWord = widget.words[this.wordIndex];
+    WordData wd = WordData(
+        currentWord.synsetId,
+        currentWord.levelId,
+        userId,
+        this.imagePath,
+        timePassed,
+        wordTyped,
+        userAnswer,
+        isWordSkipped,
+        DateTime.now().toIso8601String());
+    wd.printData();
+    wd.save();
+
+    WordDataDB.sendToServer(wd);
+    userAnswer = "";
+    timePassed = 0;
+    wordTyped = "";
+    isWordSkipped = false;
     hint = "";
     secretTaps = 0;
-    print("change state");
+
     this.wordIndex += 1;
     this.imageIndex = 1;
+    // print("$wordIndex ${widget.words.length}");
 
     if (wordIndex == widget.words.length) {
       print("Setting true nextLevel");
@@ -118,7 +218,7 @@ class _GameScreenState extends State<GameScreen> {
       await prefs.setBool('nextLevel', true);
 
       showDialog(
-          context: context,
+          context: this.context,
           builder: (BuildContext context) {
             return CustomDialogBox(
               "Congratulations!",
@@ -130,10 +230,13 @@ class _GameScreenState extends State<GameScreen> {
               false,
               "assets/images/medal.png",
             );
-          }).then((value) => Navigator.pop(context, true));
+          }).then((value) => Navigator.pop(this.context, true));
+      AuthService.updateDataToServer();
 
       return;
     }
+    this.wordlemmas = widget.words[this.wordIndex].lemmas.split(";");
+
     // String wordPath = await widget.words[this.wordIndex].getWordPath();
     // print(wordPath);
     // Directory wordDir = Directory(wordPath);
@@ -142,6 +245,7 @@ class _GameScreenState extends State<GameScreen> {
     // this.imagePath = images[0].path.toString();
     prefs.setInt(
         '${widget.words[this.wordIndex].levelId}-last-word', this.wordIndex);
+    prefs.setString('lastWord', this.wordIndex.toString());
 
     prefs.setInt(
         '${widget.words[this.wordIndex].levelId}-${widget.words[this.wordIndex].synsetId}-last-image',
@@ -158,14 +262,15 @@ class _GameScreenState extends State<GameScreen> {
       print("words =  ${widget.words.length}");
       image = Container(
         key: ValueKey<int>(this.imageIndex),
-        child: widget.mode == "offline"
+        child: widget.level.type == "offline"
             ? Image.asset(this.imagePath)
             : Image.file(
-                File(this.imagePath),
+                File(join(baseImgPath, this.imagePath)),
               ),
       );
     });
     checkArrows();
+    AuthService.updateDataToServer();
   }
 
   void checkArrows() {
@@ -210,32 +315,32 @@ class _GameScreenState extends State<GameScreen> {
     setState(() {
       image = Container(
         key: ValueKey<int>(this.imageIndex),
-        child: widget.mode == "offline"
+        child: widget.level.type == "offline"
             ? Image.asset(this.imagePath)
             : Image.file(
-                File(this.imagePath),
+                File(join(baseImgPath, this.imagePath)),
               ),
       );
       checkArrows();
-
-      print(this.imagePath);
     });
   }
 
   void _questionNextWord() async {
     void tempQuestWord() {
-      prefs.setInt('points', prefs.getInt('points') - 10);
+      if (this.isMusicOn) player.play('correct.mp3');
+      isWordSkipped = true;
+      prefs.setInt('points', prefs.getInt('points') - 15);
       _nextWord();
     }
 
     int coins = prefs.getInt('points');
-    if (coins < 10) {
+    if (coins < 15) {
       showDialog(
-          context: context,
+          context: this.context,
           builder: (BuildContext context) {
             return DialogBox(
                 "Skip word",
-                "You have $coins coins :( \n It takes 10 to change words  \n Guess a word, or enter the game another day to get coins!",
+                "You have $coins coins :( \n It takes 15 to change words. \n \n Guess a word, or enter the game another day to get coins!",
                 "Back",
                 () {},
                 "OK!",
@@ -243,11 +348,11 @@ class _GameScreenState extends State<GameScreen> {
           });
     } else {
       showDialog(
-          context: context,
+          context: this.context,
           builder: (BuildContext context) {
             return DialogBox(
                 "Skip word",
-                "You have $coins coins, do you want to use 10 to change words?.",
+                "You have $coins coins, do you want to use 15 to change word?",
                 "Cancel",
                 () {},
                 "Yes",
@@ -260,11 +365,11 @@ class _GameScreenState extends State<GameScreen> {
     int coins = prefs.getInt('points');
     if (coins < 5) {
       showDialog(
-          context: context,
+          context: this.context,
           builder: (BuildContext context) {
             return DialogBox(
                 "Hint",
-                "You have $coins coins :( \n It takes 5 to have a hint.  \n Enter the game another day to get coins!",
+                "You have $coins coins :( \n It takes 5 to get a hint. \n  \n Enter the game another day to get coins!",
                 "Back",
                 () {},
                 "OK!",
@@ -272,11 +377,11 @@ class _GameScreenState extends State<GameScreen> {
           });
     } else {
       showDialog(
-          context: context,
+          context: this.context,
           builder: (BuildContext context) {
             return DialogBox(
                 "Hint",
-                "You have $coins coins, do you want to use 5 to get a hint?.",
+                "You have $coins coins, do you want to use 5 to get a hint?",
                 "Cancel",
                 () {},
                 "Yes",
@@ -293,17 +398,31 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   void testResponse(String response) {
-    print("testResponse ${widget.words[this.wordIndex].lemma}");
+    bool isGoodAnswer = false;
+    // print("testResponse ${widget.words[this.wordIndex].lemma}");
+    // print(this.wordlemmas);
+
     if (equalsIgnoreCase(response,
             widget.words[this.wordIndex].lemma.replaceAll("_", " ")) ==
-        true) {
+        true) isGoodAnswer = true;
+    wordTyped += response + ";";
+    if (!isGoodAnswer)
+      for (String lm in this.wordlemmas) {
+        if (equalsIgnoreCase(response, lm.replaceAll("_", " ")) == true)
+          isGoodAnswer = true;
+      }
+
+    if (isGoodAnswer == true) {
+      if (this.isMusicOn) player.play('correct.mp3');
+      print("mmmmmmmmmm $response");
+      this.userAnswer = response;
       hint = "";
       prefs.setInt('points', prefs.getInt('points') + 10);
-      print("DATA Points = ${prefs.getInt('points')} ");
+      // print("${wordIndex + 1}  ${widget.words.length}");
 
-      if ((wordIndex + 1 < widget.words.length))
+      if ((wordIndex < widget.words.length))
         showDialog(
-            context: context,
+            context: this.context,
             builder: (BuildContext context) {
               return CustomDialogBox(
                 "Correct :)",
@@ -317,6 +436,7 @@ class _GameScreenState extends State<GameScreen> {
       else
         _nextWord();
     } else {
+      if (this.isMusicOn) player.play('wrong.mp3');
       setState(() {
         hint = "Try again!";
         responseVisibility = true; // second function
@@ -457,14 +577,34 @@ class _GameScreenState extends State<GameScreen> {
                     ],
                   ),
                   Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: AnswerTextInput(
-                        _controller,
-                        testResponse,
-                        responseVisibility,
-                        hint,
-                        this.focusNode,
-                        questionAnswerHint),
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          flex: 5,
+                          child: AnswerTextInput(
+                              _controller,
+                              testResponse,
+                              responseVisibility,
+                              hint,
+                              this.focusNode,
+                              questionAnswerHint),
+                        ),
+                        Expanded(
+                          flex: 1,
+                          child: IconButton(
+                            onPressed: () {
+                              testResponse(_controller.text);
+                            },
+                            iconSize: 30,
+                            icon: Image.asset(
+                              "assets/images/game-play.png",
+                              color: Colors.black,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,

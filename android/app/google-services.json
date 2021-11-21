@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "560408080314",
+    "project_id": "guess-the-word-sofia",
+    "storage_bucket": "guess-the-word-sofia.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:560408080314:android:64ef36f4f4e6685d943783",
+        "android_client_info": {
+          "package_name": "com.guess_the_word.so"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "560408080314-2sk26ufhva243hc62m41qmkcrv71t1e8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDn5pbixMQJ0_0_RWHmzPz3F-w-_Ls0-ww"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "560408080314-2sk26ufhva243hc62m41qmkcrv71t1e8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
