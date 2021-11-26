@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:sofia/components/policy/privacyPolicy.dart';
+import 'package:sofia/components/policy/termsCondiction.dart';
 
 class Credits extends StatelessWidget {
   void showAboutDialog({
@@ -29,17 +31,39 @@ class Credits extends StatelessWidget {
     );
   }
 
+  void _moveToPolicy(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) {
+          return PrivacyPolicy();
+        },
+      ),
+    );
+  }
+
+  void _moveToTermsCondiction(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) {
+          return TermsCondiction();
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SingleChildScrollView(
-        child: Container(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Center(child: Text("""
+        child: Stack(
+          children: [
+            Container(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Center(child: Text("""
 Created by:
 Ion Drumea
 
@@ -50,46 +74,70 @@ Wikipedia http://www.wikipedia.org
 Logo icon - icon4yu https://thenounproject.com/icon4yu/
 
 Icons from www.flaticon.com:
-Play button, Coins-Reward, Coming-soon, Coins, Start, Arrow, Unknown, Monument, Vechicle, Correct symbol -  Freepik https://www.freepik.com" 
-Sports - Pause08 https://www.flaticon.com/authors/pause08
-Medal - Vectors Market https://www.flaticon.com/authors/vectors-market
-Game-play button - abdul-allib https://www.flaticon.com/authors/abdul-allib
-Logout - wahyu-adam https://www.flaticon.com/authors/wahyu-adam
-items - pixel-perfect https://www.flaticon.com/authors/pixel-perfect
-End race - eight-black-dots https://www.flaticon.com/authors/eight-black-dots 
-Music Instruments - surang https://www.flaticon.com/authors/surang
 
 Sounds: Zapsplat.com
 
 
 
 
-                """)),
+                    """)),
+                  ),
+                  Column(
+                    children: [
+                      TextButton(
+                        child: Text(
+                          "Other licences",
+                        ),
+                        onPressed: () {
+                          showAboutDialog(
+                              context: context,
+                              applicationName: "Guess the Word",
+                              applicationVersion: "Version 0.1");
+                        },
+                      ),
+                      TextButton(
+                        child: Text(
+                          "Privacy Policy",
+                        ),
+                        onPressed: () {
+                          _moveToPolicy(context);
+                        },
+                      ),
+                      TextButton(
+                        child: Text(
+                          "Terms & Condition",
+                        ),
+                        onPressed: () {
+                          _moveToTermsCondiction(context);
+                        },
+                      ),
+                    ],
+                  )
+                ],
               ),
-              TextButton(
-                child: Text(
-                  "Other licences",
-                ),
+              height: MediaQuery.of(context).size.height -
+                  MediaQuery.of(context).padding.bottom,
+              decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                begin: Alignment.topRight,
+                end: Alignment.bottomLeft,
+                colors: [
+                  Colors.indigo[400]!,
+                  Colors.red,
+                ],
+              )),
+            ),
+            Positioned(
+              left: 15,
+              top: 10,
+              child: IconButton(
+                icon: Image.asset("assets/images/left.png"),
                 onPressed: () {
-                  showAboutDialog(
-                      context: context,
-                      applicationName: "Guess the Word",
-                      applicationVersion: "Version 0.1");
+                  Navigator.pop(context, true);
                 },
-              )
-            ],
-          ),
-          height: MediaQuery.of(context).size.height -
-              MediaQuery.of(context).padding.bottom,
-          decoration: BoxDecoration(
-              gradient: LinearGradient(
-            begin: Alignment.topRight,
-            end: Alignment.bottomLeft,
-            colors: [
-              Colors.indigo[400]!,
-              Colors.red,
-            ],
-          )),
+              ),
+            ),
+          ],
         ),
       ),
     );

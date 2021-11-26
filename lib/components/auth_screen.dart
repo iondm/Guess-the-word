@@ -3,12 +3,35 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sofia/components/error/http_exception.dart';
+import 'package:sofia/components/policy/privacyPolicy.dart';
+import 'package:sofia/components/policy/termsCondiction.dart';
 import 'package:sofia/services/authService.dart';
+import 'package:flutter/gestures.dart';
 
 enum AuthMode { Signup, Login }
 
 class AuthScreen extends StatelessWidget {
   static const routeName = '/auth';
+
+  void _moveToPolicy(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) {
+          return PrivacyPolicy();
+        },
+      ),
+    );
+  }
+
+  void _moveToTermsCondiction(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) {
+          return TermsCondiction();
+        },
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,8 +76,47 @@ class AuthScreen extends StatelessWidget {
                     flex: deviceSize.width > 600 ? 3 : 2,
                     child: AuthCard(),
                   ),
+                  Container(
+                    padding: EdgeInsets.only(left: 60.0, right: 60, top: 20),
+                    child: RichText(
+                        textAlign: TextAlign.center,
+                        text: TextSpan(children: [
+                          TextSpan(
+                              text:
+                                  "By clicking sign up you will accept our \n",
+                              style: TextStyle(color: Colors.black)),
+                          TextSpan(
+                              text: "terms and conditions ",
+                              style: TextStyle(color: Colors.orange),
+                              recognizer: new TapGestureRecognizer()
+                                ..onTap =
+                                    () => _moveToTermsCondiction(context)),
+                          TextSpan(
+                              text: "and ",
+                              style: TextStyle(color: Colors.black)),
+                          TextSpan(
+                              text: "privacy policy",
+                              style: TextStyle(color: Colors.orange),
+                              recognizer: new TapGestureRecognizer()
+                                ..onTap = () => _moveToPolicy(context)),
+                          TextSpan(
+                            text: ".",
+                            style: TextStyle(color: Colors.black),
+                          ),
+                        ])),
+                  )
                 ],
               ),
+            ),
+          ),
+          Positioned(
+            left: 15,
+            top: 10,
+            child: IconButton(
+              icon: Image.asset("assets/images/left.png"),
+              onPressed: () {
+                Navigator.pop(context, true);
+              },
             ),
           ),
         ],
@@ -70,7 +132,7 @@ class AuthCard extends StatefulWidget {
 
 class _AuthCardState extends State<AuthCard> {
   final GlobalKey<FormState> _formKey = GlobalKey();
-  AuthMode _authMode = AuthMode.Login;
+  AuthMode _authMode = AuthMode.Signup;
   Map<String, String> _authData = {
     'email': '',
     'password': '',

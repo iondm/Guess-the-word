@@ -50,7 +50,7 @@ void asyncInit() async {
 
   // prefs.setInt('start_v1-last-word', 0);
 
-  if (prefs.getBool('isMusicOn') == null) prefs.setInt('currentLevel', 0);
+  prefs.setInt('currentLevel', 0);
   if (prefs.getBool('isMusicOn') == null) prefs.setBool('isMusicOn', true);
   if (prefs.getInt('lastLevelDownloaded') == null)
     prefs.setInt('lastLevelDownloaded', 6);

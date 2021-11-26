@@ -357,6 +357,16 @@ class _LevelsState extends State<Levels> with SingleTickerProviderStateMixin {
               ],
             ),
           ),
+          Positioned(
+            left: 15,
+            top: 10,
+            child: IconButton(
+              icon: Image.asset("assets/images/left.png"),
+              onPressed: () {
+                Navigator.pop(context, true);
+              },
+            ),
+          ),
         ],
       ),
     );

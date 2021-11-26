@@ -287,7 +287,7 @@ class _StartPageState extends State<StartPage> with TickerProviderStateMixin {
                             this.isAuth
                                 ? TextButton(
                                     child: Text(
-                                      "Login",
+                                      "Sign up",
                                       style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 30,
@@ -343,7 +343,7 @@ class _StartPageState extends State<StartPage> with TickerProviderStateMixin {
                 children: [
                   TextButton(
                     child: Text(
-                      "Credits",
+                      "Credits and info",
                     ),
                     onPressed: () {
                       goToCredits();

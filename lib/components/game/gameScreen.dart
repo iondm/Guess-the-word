@@ -465,166 +465,181 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
-        body: SingleChildScrollView(
-          child: Container(
-            height: MediaQuery.of(context).size.height -
-                MediaQuery.of(context).padding.bottom,
-            decoration: BoxDecoration(
-                gradient: LinearGradient(
-              begin: Alignment.topRight,
-              end: Alignment.bottomLeft,
-              colors: [
-                Colors.indigo[400]!,
-                Colors.red,
-              ],
-            )),
-            child: Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Column(
-                children: [
-                  Container(
-                    height: 275,
-                    child: GestureDetector(
-                      child: AnimatedSwitcher(
-                        duration: const Duration(seconds: 1),
-                        transitionBuilder:
-                            (Widget child, Animation<double> animation) =>
-                                ScaleTransition(child: child, scale: animation),
-                        child: Container(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topRight,
-                                end: Alignment.bottomLeft,
-                                colors: [
-                                  Colors.indigo[400]!,
-                                  Colors.red,
-                                ],
-                              ),
-                              borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(10),
-                                  topRight: Radius.circular(10),
-                                  bottomLeft: Radius.circular(10),
-                                  bottomRight: Radius.circular(10)),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.5),
-                                  spreadRadius: 5,
-                                  blurRadius: 7,
-                                  offset: Offset(
-                                      0, 3), // changes position of shadow
-                                ),
-                              ],
-                            ),
-                            child: image),
-                      ),
-                      onTap: _secretTap,
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Expanded(
-                        child: IconButton(
-                          onPressed: () => _nextImage(-1),
-                          icon: Transform.rotate(
-                              angle: 90 * math.pi / 180,
-                              child: Icon(
-                                Icons.arrow_circle_down_sharp,
-                                size: 40,
-                                color: leftArrow == true
-                                    ? Colors.teal
-                                    : Colors.black,
-                              )),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 3,
-                        child: TextButton(
-                          onPressed: () => _questionNextWord(),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              SizedBox(width: 40),
-                              Text(
-                                "Skip word 10",
-                                style: TextStyle(
-                                    color: Colors.orange,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16),
-                              ),
-                              SizedBox(width: 8),
-                              Image.asset("assets/images/coins.png", height: 20)
-                            ],
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: IconButton(
-                          onPressed: () => _nextImage(1),
-                          iconSize: 30,
-                          icon: Transform.rotate(
-                              angle: 90 * math.pi / 180,
-                              child: Icon(
-                                Icons.arrow_circle_up_sharp,
-                                size: 40,
-                                color: rightArrow == true
-                                    ? Colors.teal
-                                    : Colors.black,
-                              )),
-                        ),
-                      )
-                    ],
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          flex: 5,
-                          child: AnswerTextInput(
-                              _controller,
-                              testResponse,
-                              responseVisibility,
-                              hint,
-                              this.focusNode,
-                              questionAnswerHint),
-                        ),
-                        Expanded(
-                          flex: 1,
-                          child: IconButton(
-                            onPressed: () {
-                              testResponse(_controller.text);
-                            },
-                            iconSize: 30,
-                            icon: Image.asset(
-                              "assets/images/game-play.png",
-                              color: Colors.black,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+        body: Stack(
+          children: [
+            SingleChildScrollView(
+              child: Container(
+                height: MediaQuery.of(context).size.height -
+                    MediaQuery.of(context).padding.bottom,
+                decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                  begin: Alignment.topRight,
+                  end: Alignment.bottomLeft,
+                  colors: [
+                    Colors.indigo[400]!,
+                    Colors.red,
+                  ],
+                )),
+                child: Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Column(
                     children: [
                       Container(
-                        child: Visibility(
-                          child: Text(
-                            responseText,
-                            style:
-                                TextStyle(color: responseColor, fontSize: 20),
+                        height: 275,
+                        child: GestureDetector(
+                          child: AnimatedSwitcher(
+                            duration: const Duration(seconds: 1),
+                            transitionBuilder: (Widget child,
+                                    Animation<double> animation) =>
+                                ScaleTransition(child: child, scale: animation),
+                            child: Container(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topRight,
+                                    end: Alignment.bottomLeft,
+                                    colors: [
+                                      Colors.indigo[400]!,
+                                      Colors.red,
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(10),
+                                      topRight: Radius.circular(10),
+                                      bottomLeft: Radius.circular(10),
+                                      bottomRight: Radius.circular(10)),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.5),
+                                      spreadRadius: 5,
+                                      blurRadius: 7,
+                                      offset: Offset(
+                                          0, 3), // changes position of shadow
+                                    ),
+                                  ],
+                                ),
+                                child: image),
                           ),
-                          visible: responseVisibility,
+                          onTap: _secretTap,
                         ),
+                      ),
+                      SizedBox(height: 10),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: IconButton(
+                              onPressed: () => _nextImage(-1),
+                              icon: Transform.rotate(
+                                  angle: 90 * math.pi / 180,
+                                  child: Icon(
+                                    Icons.arrow_circle_down_sharp,
+                                    size: 40,
+                                    color: leftArrow == true
+                                        ? Colors.teal
+                                        : Colors.black,
+                                  )),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 3,
+                            child: TextButton(
+                              onPressed: () => _questionNextWord(),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  SizedBox(width: 40),
+                                  Text(
+                                    "Skip word 10",
+                                    style: TextStyle(
+                                        color: Colors.orange,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16),
+                                  ),
+                                  SizedBox(width: 8),
+                                  Image.asset("assets/images/coins.png",
+                                      height: 20)
+                                ],
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: IconButton(
+                              onPressed: () => _nextImage(1),
+                              iconSize: 30,
+                              icon: Transform.rotate(
+                                  angle: 90 * math.pi / 180,
+                                  child: Icon(
+                                    Icons.arrow_circle_up_sharp,
+                                    size: 40,
+                                    color: rightArrow == true
+                                        ? Colors.teal
+                                        : Colors.black,
+                                  )),
+                            ),
+                          )
+                        ],
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              flex: 5,
+                              child: AnswerTextInput(
+                                  _controller,
+                                  testResponse,
+                                  responseVisibility,
+                                  hint,
+                                  this.focusNode,
+                                  questionAnswerHint),
+                            ),
+                            Expanded(
+                              flex: 1,
+                              child: IconButton(
+                                onPressed: () {
+                                  testResponse(_controller.text);
+                                },
+                                iconSize: 30,
+                                icon: Image.asset(
+                                  "assets/images/game-play.png",
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            child: Visibility(
+                              child: Text(
+                                responseText,
+                                style: TextStyle(
+                                    color: responseColor, fontSize: 20),
+                              ),
+                              visible: responseVisibility,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
+                ),
               ),
             ),
-          ),
+            // Positioned(
+            //   left: 15,
+            //   top: 10,
+            //   child: IconButton(
+            //     icon: Image.asset("assets/images/left.png"),
+            //     onPressed: () {
+            //       Navigator.pop(context, true);
+            //     },
+            //   ),
+            // ),
+          ],
         ),
       ),
     );
